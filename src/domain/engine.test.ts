@@ -61,7 +61,71 @@ describe('baseline and scoped propagation', () => {
     const result = evaluateOffice(office, departure('ava'));
     expect(getEligibleApprovers(result, 'head-media')).toEqual([]);
     expect(result.roles.find(role => role.roleId === 'head-media')?.accountablePersonId).toBeNull();
-    expect(node(result, 'r:head-media').reason).toContain('No active owner');
+    expect(node(result, 'r:head-media').reason).toContain('accountability chain contains a cycle');
+  });
+});
+
+describe('final-plan handover authority', () => {
+  const joiningProducer = (): Plan => ({
+    ...createBaselinePlan(),
+    scenario: { id: 'join-robin', kind: 'join', targetRoleId: 'production-lead', newPerson: { id: 'robin', name: 'Robin Taylor', title: 'Producer', department: 'Media', active: true, skills: ['production-lead'] }, createdAt: '2026-11-04T10:00:00Z' },
+  });
+  const productionRepair = (authorisedById: string) => repair({ id: 'handover-production', roleId: 'production-lead', candidateId: 'robin', authorisedById });
+  const mediaRepair = () => repair({ candidateId: 'sam', authorisedById: 'ava' });
+
+  it('rejects the former upstream owner identically in either repair order', () => {
+    const records = [productionRepair('maya'), mediaRepair()];
+    const forward = evaluateOffice(seedOffice, { ...joiningProducer(), repairs: records });
+    const reverse = evaluateOffice(seedOffice, { ...joiningProducer(), repairs: [...records].reverse() });
+    expect(forward.roles).toEqual(reverse.roles);
+    expect(forward.nodes).toEqual(reverse.nodes);
+    expect(forward.findings).toEqual(reverse.findings);
+    expect(forward.roles.find(role => role.roleId === 'head-media')).toMatchObject({ ownerId: 'sam', status: 'verified' });
+    expect(forward.roles.find(role => role.roleId === 'production-lead')).toMatchObject({ ownerId: 'ellis', status: 'proposed' });
+    expect(validateRepair(forward, records[0]).join(' ')).toContain('final plan');
+    expect(node(forward, 'r:production-lead').reason).toContain('Handover was not applied');
+    expect(forward.findings.some(finding => finding.id === 'role-production-lead')).toBe(true);
+    for (const role of forward.roles.filter(role => role.status === 'verified')) expect(validateRepair(forward, role.repair!)).toEqual([]);
+  });
+
+  it('accepts the confirmed new upstream owner in either input order', () => {
+    const records = [productionRepair('sam'), mediaRepair()];
+    const forward = evaluateOffice(seedOffice, { ...joiningProducer(), repairs: records });
+    const reverse = evaluateOffice(seedOffice, { ...joiningProducer(), repairs: [...records].reverse() });
+    expect(forward.roles).toEqual(reverse.roles);
+    expect(forward.roles.find(role => role.roleId === 'production-lead')).toMatchObject({ ownerId: 'robin', status: 'verified', accountablePersonId: 'sam' });
+    expect(forward.summary.verified).toBe(2);
+    for (const role of forward.roles.filter(role => role.status === 'verified')) expect(validateRepair(forward, role.repair!)).toEqual([]);
+  });
+
+  it('reopens an earlier handover when its authoriser loses the relevant authority', () => {
+    const original = productionRepair('maya');
+    const before = evaluateOffice(seedOffice, { ...joiningProducer(), repairs: [original] });
+    expect(before.roles.find(role => role.roleId === 'production-lead')).toMatchObject({ ownerId: 'robin', status: 'verified' });
+    const after = evaluateOffice(seedOffice, { ...joiningProducer(), repairs: [original, mediaRepair()] });
+    expect(after.roles.find(role => role.roleId === 'production-lead')).toMatchObject({ ownerId: 'ellis', status: 'proposed' });
+    expect(node(after, 'p:robin').status).toBe('proposed');
+    expect(getEligibleApprovers(after, 'production-lead').map(person => person.id)).not.toContain('maya');
+    expect(validateRepair(after, original).length).toBeGreaterThan(0);
+  });
+
+  it('keeps approval valid when the person still owns a higher configured accountability role', () => {
+    const original = productionRepair('ava');
+    const result = evaluateOffice(seedOffice, { ...joiningProducer(), repairs: [original, mediaRepair()] });
+    expect(result.roles.find(role => role.roleId === 'production-lead')).toMatchObject({ ownerId: 'robin', status: 'verified' });
+    expect(validateRepair(result, original)).toEqual([]);
+  });
+
+  it('cannot bootstrap confirmation from a circular accountability configuration', () => {
+    const office = structuredClone(seedOffice);
+    office.roles.find(role => role.id === 'managing-director')!.accountableRoleId = 'head-media';
+    const records = [productionRepair('sam'), mediaRepair()];
+    for (const repairs of [records, [...records].reverse()]) {
+      const result = evaluateOffice(office, { ...joiningProducer(), repairs });
+      expect(result.summary.verified).toBe(0);
+      expect(getEligibleApprovers(result, 'head-media')).toEqual([]);
+      for (const record of records) expect(validateRepair(result, record).join(' ')).toContain('accountability chain contains a cycle');
+    }
   });
 });
 

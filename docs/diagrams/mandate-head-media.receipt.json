@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/darkcomet/Documents/ChatGPT/Claude/claude-cyber-hackathon/docs/diagrams/mandate-head-media.architecture.json",
+  "output": "/Users/darkcomet/Documents/ChatGPT/Claude/claude-cyber-hackathon/docs/diagrams/mandate-head-media.html",
+  "specification": {
+    "sha256": "1f4d1df65f74ff8f594e39d19aa8c3ef52bf8485f7216d9c09f54bf4d28f21b6",
+    "bytes": 5979
+  },
+  "artifact": {
+    "sha256": "1ee2bf12180a09cfad56e5b83418c3b9e3ed4255967cfadda95497e37d0c386f",
+    "bytes": 811924
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

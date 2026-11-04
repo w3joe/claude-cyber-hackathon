@@ -8,15 +8,27 @@ const personName = (people: Person[], id: string | null | undefined) => people.f
 const activePerson = (people: Person[], id: string | null | undefined) => people.find(person => person.id === id && person.active);
 const canOwn = (role: Role, person: Person) => person.active && (role.ownerId === person.id || role.deputyIds.includes(person.id) || role.eligiblePersonIds.includes(person.id) || person.skills.includes(role.id));
 
-function accountabilityChain(office: Office, roles: RoleImpact[], people: Person[], roleId: string): Person[] {
-  const result: Person[] = [];
+function accountabilityPath(office: Office, roleId: string): { roleIds: string[]; cyclic: boolean } {
+  const roleIds: string[] = [];
   const seen = new Set<string>([roleId]);
   let next = office.roles.find(role => role.id === roleId)?.accountableRoleId;
-  while (next && !seen.has(next)) {
+  while (next) {
+    if (seen.has(next)) return { roleIds, cyclic: true };
     seen.add(next);
-    const owner = activePerson(people, roles.find(role => role.roleId === next)?.ownerId);
-    if (owner && !result.some(person => person.id === owner.id)) result.push(owner);
+    roleIds.push(next);
     next = office.roles.find(role => role.id === next)?.accountableRoleId;
+  }
+  return { roleIds, cyclic: false };
+}
+
+function accountabilityChain(office: Office, roles: RoleImpact[], people: Person[], roleId: string): Person[] {
+  const path = accountabilityPath(office, roleId);
+  // A circular configuration cannot establish independent decision-making authority.
+  if (path.cyclic) return [];
+  const result: Person[] = [];
+  for (const ancestorId of path.roleIds) {
+    const owner = activePerson(people, roles.find(role => role.roleId === ancestorId)?.ownerId);
+    if (owner && !result.some(person => person.id === owner.id)) result.push(owner);
   }
   return result;
 }
@@ -34,7 +46,8 @@ export function validateRepair(snapshot: Snapshot, repair: Repair): string[] {
   else if (role && !canOwn(role, candidate)) errors.push('The proposed owner is not a recorded deputy, eligible candidate or person with the recorded role competency.');
   if (repair.status !== 'proposed' && repair.status !== 'confirmed') errors.push('The handover status is invalid.');
   if (repair.status === 'confirmed') {
-    if (!getEligibleApprovers(snapshot, repair.roleId).some(person => person.id === repair.authorisedById)) errors.push('An active owner in the configured accountability chain must authorise the handover.');
+    if (accountabilityPath(snapshot.office, repair.roleId).cyclic) errors.push('The configured accountability chain contains a cycle. Correct it before confirming a handover.');
+    else if (!getEligibleApprovers(snapshot, repair.roleId).some(person => person.id === repair.authorisedById)) errors.push('An active owner in the final plan’s configured accountability chain must authorise the handover. A previous role-holder’s authority is not assumed.');
     if (repair.authorisedById === repair.candidateId) errors.push('The proposed owner cannot authorise their own handover.');
     if (repair.ownerAccepted !== true) errors.push('The new owner must explicitly accept the responsibility.');
     if (repair.authorityConfirmed !== true) errors.push('The required decision-making authority must be confirmed.');
@@ -60,6 +73,7 @@ function candidatesFor(office: Office, people: Person[], role: Role, plan: Plan)
 
 function accountabilityReason(office: Office, roles: RoleImpact[], people: Person[], role: Role): string {
   if (!role.accountableRoleId) return 'This is the configured final accountability point.';
+  if (accountabilityPath(office, role.id).cyclic) return 'The configured accountability chain contains a cycle; no independent authoriser can be established until it is corrected.';
   const chain = accountabilityChain(office, roles, people, role.id);
   if (!chain.length) return 'No active owner is available in the configured accountability chain; a governance decision is required.';
   const directRole = roles.find(item => item.roleId === role.accountableRoleId);
@@ -94,8 +108,12 @@ export function evaluateOffice(office: Office, plan: Plan): Snapshot {
   });
   const snapshot: Snapshot = { office, plan, people, roles, nodes: [], edges: [], findings: [], requirements: [], affectedNodeIds: [], summary: { affected: 0, unowned: 0, proposed: 0, verified: 0, requirementsAtRisk: 0 }, scenarioLabel: 'Baseline office' };
   const repairErrors = new Map<string, string[]>();
-  // Only the most recently supplied decision for a role applies. An invalid confirmation never appoints anyone.
-  const latestRepairs = [...new Map(plan.repairs.map(repair => [repair.roleId, repair])).values()];
+  // Resolve upstream ownership before any role whose authority depends on it.
+  // This is a final-plan assessment, not a historical approval log: input array
+  // order must not let a former role-holder authorise a downstream appointment.
+  // Acyclic ancestry gives a deterministic order; cyclic chains cannot confirm.
+  const latestRepairs = [...new Map(plan.repairs.map(repair => [repair.roleId, repair])).values()].sort((a, b) =>
+    accountabilityPath(office, a.roleId).roleIds.length - accountabilityPath(office, b.roleId).roleIds.length || a.roleId.localeCompare(b.roleId));
   for (const repair of latestRepairs) {
     const impact = roles.find(role => role.roleId === repair.roleId);
     if (!impact) continue;
@@ -110,6 +128,9 @@ export function evaluateOffice(office: Office, plan: Plan): Snapshot {
       impact.status = 'proposed';
       impact.reason = `${personName(people, repair.candidateId)} is proposed. ${impact.ownerId ? `${personName(people, impact.ownerId)} remains the recorded owner.` : 'Ownership remains unfilled.'} Authorisation, acceptance, authority, access and handover evidence must be confirmed.`;
     } else {
+      // Keep an existing owner in place, but surface the rejected handover as
+      // pending work instead of hiding it behind the role's baseline coverage.
+      if (impact.ownerId) impact.status = 'proposed';
       impact.reason += ` Handover was not applied: ${errors.join(' ')}`;
     }
   }
@@ -141,7 +162,7 @@ export function evaluateOffice(office: Office, plan: Plan): Snapshot {
     if (impact.ownerId) pushEdge(`p:${impact.ownerId}`, `r:${role.id}`, impact.status === 'verified' ? 'handover recorded' : 'owns');
     else if (role.ownerId) pushEdge(`p:${role.ownerId}`, `r:${role.id}`, 'ownership removed');
     if (role.accountableRoleId) pushEdge(`r:${role.accountableRoleId}`, `r:${role.id}`, 'accountable for');
-    if (impact.repair && impact.status === 'proposed') pushEdge(`p:${impact.repair.candidateId}`, `r:${role.id}`, 'proposed');
+    if (impact.repair && impact.status === 'proposed' && people.some(person => person.id === impact.repair?.candidateId)) pushEdge(`p:${impact.repair.candidateId}`, `r:${role.id}`, 'proposed');
     else if (isScenarioTarget(role.id)) {
       const id = scenario.kind === 'join' ? scenario.newPerson?.id : scenario.personId;
       if (id && people.some(person => person.id === id)) pushEdge(`p:${id}`, `r:${role.id}`, 'proposed');

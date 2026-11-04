@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Head of Media · responsibility map",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "external": {
+          "label": "People"
+        },
+        "backend": {
+          "label": "Responsibilities"
+        },
+        "cloud": {
+          "label": "Systems"
+        },
+        "security": {
+          "label": "Controls"
+        },
+        "database": {
+          "label": "Requirements"
+        }
+      }
+    },
+    "views": [
+      {
+        "id": "current-responsibility",
+        "label": "Responsibility overview",
+        "focus": [
+          "r_head-media",
+          "p_maya",
+          "r_managing-director",
+          "c_campaign-approval",
+          "q_release-policy",
+          "c_media-rights",
+          "q_media-permissions",
+          "c_publisher-review",
+          "q_access-policy"
+        ],
+        "note": "Statuses come from the current planning snapshot. Select a node to inspect its authored relationships."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "r_head-media",
+      "type": "backend",
+      "label": "Head of Media",
+      "sublabel": "No confirmed owner",
+      "tag": "unowned · scenario affected",
+      "pos": [
+        380,
+        240
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "p_maya",
+      "type": "external",
+      "label": "Maya Chen",
+      "sublabel": "Person · inactive",
+      "tag": "inactive · scenario affected",
+      "pos": [
+        40,
+        240
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "r_managing-director",
+      "type": "backend",
+      "label": "Managing Director",
+      "sublabel": "Ava Reed",
+      "tag": "covered",
+      "pos": [
+        380,
+        40
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "c_campaign-approval",
+      "type": "security",
+      "label": "Material campaign approval",
+      "sublabel": "Control · unowned",
+      "tag": "unowned · scenario affected",
+      "pos": [
+        810,
+        40
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "q_release-policy",
+      "type": "database",
+      "label": "Authorised material release",
+      "sublabel": "Requirement · at risk",
+      "tag": "at risk · scenario affected",
+      "pos": [
+        1150,
+        40
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "c_media-rights",
+      "type": "security",
+      "label": "Licence & permission checks",
+      "sublabel": "Control · unowned",
+      "tag": "unowned · scenario affected",
+      "pos": [
+        810,
+        240
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "q_media-permissions",
+      "type": "database",
+      "label": "Customer media permission",
+      "sublabel": "Requirement · at risk",
+      "tag": "at risk · scenario affected",
+      "pos": [
+        1150,
+        240
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "c_publisher-review",
+      "type": "security",
+      "label": "Publishing admin review",
+      "sublabel": "Control · unowned",
+      "tag": "unowned · scenario affected",
+      "pos": [
+        810,
+        440
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "q_access-policy",
+      "type": "database",
+      "label": "Controlled account access",
+      "sublabel": "Requirement · at risk",
+      "tag": "at risk · scenario affected",
+      "pos": [
+        1150,
+        440
+      ],
+      "size": [
+        200,
+        90
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "relationship_0",
+      "from": "p_maya",
+      "to": "r_head-media",
+      "label": "ownership removed",
+      "variant": "dashed"
+    },
+    {
+      "id": "relationship_1",
+      "from": "r_managing-director",
+      "to": "r_head-media",
+      "label": "accountable for",
+      "variant": "default",
+      "labelAt": [
+        480,
+        188
+      ]
+    },
+    {
+      "id": "relationship_2",
+      "from": "r_head-media",
+      "to": "c_campaign-approval",
+      "label": "owns control",
+      "variant": "emphasis",
+      "labelAt": [
+        759.4,
+        88
+      ]
+    },
+    {
+      "id": "relationship_3",
+      "from": "c_campaign-approval",
+      "to": "q_release-policy",
+      "label": "supports requirement",
+      "variant": "emphasis"
+    },
+    {
+      "id": "relationship_4",
+      "from": "r_head-media",
+      "to": "c_media-rights",
+      "label": "owns control",
+      "variant": "emphasis",
+      "labelAt": [
+        759.4,
+        288
+      ]
+    },
+    {
+      "id": "relationship_5",
+      "from": "c_media-rights",
+      "to": "q_media-permissions",
+      "label": "supports requirement",
+      "variant": "emphasis"
+    },
+    {
+      "id": "relationship_6",
+      "from": "r_head-media",
+      "to": "c_publisher-review",
+      "label": "owns control",
+      "variant": "emphasis",
+      "labelAt": [
+        759.4,
+        488
+      ]
+    },
+    {
+      "id": "relationship_7",
+      "from": "c_publisher-review",
+      "to": "q_access-policy",
+      "label": "supports requirement",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "slate",
+      "title": "System dependencies",
+      "items": [
+        "Material campaign approval: Campaign Board.",
+        "Media licence and permission checks: Asset Library.",
+        "Publishing administrator review: Publishing Console."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Scope and evidence",
+      "items": [
+        "Role overview: ownership, accountability and directly owned controls. Select a control to explore its systems.",
+        "Maya Chen leaves. Fictional planning records; relationships show authored reachability, not live system behaviour."
+      ]
+    }
+  ]
+}
