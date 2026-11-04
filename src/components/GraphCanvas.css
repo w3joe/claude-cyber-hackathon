@@ -1,30 +1,39 @@
-.graph-shell.archify-shell { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 510px; background: #f7f8f5; color: #183d34; overflow: hidden; }
-.archify-shell:fullscreen { height: 100vh; background: #f7f8f5; }
-.archify-map-toolbar { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 15px 8px; border-bottom: 1px solid #e1e7dc; }
-.archify-map-identity { display: flex; align-items: center; gap: 7px; color: #3c5d48; font-size: 11px; font-weight: 600; }
+.graph-shell.archify-shell { position: relative; display: flex; flex-direction: column; flex: 1; width: 100%; min-height: 0; background: var(--bg-deep); color: var(--text); overflow: hidden; }
+.archify-shell:fullscreen { height: 100vh; }
+.archify-map-toolbar { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.archify-map-identity { display: flex; align-items: center; gap: 8px; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.archify-map-identity svg { color: var(--accent); }
 .archify-map-actions { display: flex; align-items: center; gap: 5px; }
-.archify-map-actions button { display: flex; align-items: center; justify-content: center; width: 30px; height: 29px; padding: 0; border: 1px solid #dce4d6; border-radius: 6px; background: #fff; color: #59744f; cursor: pointer; }
-.archify-map-actions button:hover { background: #edf2e8; color: #183d34; }
+.archify-map-actions button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); color: var(--muted); }
+.archify-map-actions button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .archify-map-actions button:disabled { opacity: .4; cursor: default; }
-.archify-map-actions button:focus-visible, .archify-map-scope select:focus-visible { outline: 2px solid #4e765c; outline-offset: 3px; }
-.archify-map-scope { flex: 0 0 auto; display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; padding: 10px 15px; border-bottom: 1px solid #dfe7da; background: #fbfcf9; }
-.archify-map-scope label { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: #819075; font-size: 9px; font-weight: 500; }
-.archify-map-scope select { width: 100%; min-width: 0; height: 30px; padding: 0 23px 0 8px; border: 1px solid #dce5d4; border-radius: 5px; background: #fff; color: #426136; font: inherit; font-size: 11px; }
-.archify-viewport { position: relative; flex: 1 1 auto; min-height: 400px; background: #fff; }
-.archify-frame { display: block; width: 100%; height: 100%; min-height: 400px; position: absolute; inset: 0; border: 0; background: #fff; }
-.archify-navigation { position: absolute; bottom: 13px; left: 14px; display: flex; align-items: center; padding: 3px; gap: 2px; border: 1px solid #dce5d4; border-radius: 7px; background: #fffffff2; box-shadow: 0 2px 8px #183d3408; }
-.archify-navigation button { display: inline-flex; gap: 5px; justify-content: center; align-items: center; height: 29px; padding: 0 8px; border: 0; border-radius: 4px; background: transparent; color: #57744d; cursor: pointer; font: inherit; font-size: 10px; }
-.archify-navigation button:hover { background: #edf2e8; }
-.archify-navigation button:focus-visible { outline: 2px solid #4e765c; outline-offset: 2px; }
-.archify-map-state { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; padding: 35px; text-align: center; color: #7a916f; background: #f7f8f5; }
-.archify-map-state strong { color: #416237; font-size: 13px; font-weight: 600; }
-.archify-map-state p { margin: 0; max-width: 520px; max-height: 180px; overflow: auto; font-size: 11px; line-height: 1.7; white-space: pre-line; }
-.archify-map-state small { max-width: 330px; font-size: 10px; line-height: 1.6; }
-.archify-map-state--error { color: #b27a56; }
-.archify-map-state--error strong { color: #955b38; }
-.archify-map-footer { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 7px 14px; padding: 9px 15px; border-top: 1px solid #dfe7da; color: #819475; background: #fbfcf9; font-size: 9px; line-height: 1.4; }
-.archify-map-footer > span { display: inline-flex; align-items: center; gap: 5px; }
+.archify-map-scope { flex: 0 0 auto; display: grid; grid-template-columns: 1fr 1.3fr; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.archify-map-scope label { display: flex; flex-direction: column; gap: 5px; min-width: 0; font: 600 9.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.archify-map-scope select { width: 100%; min-width: 0; height: 32px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--bg-deep); color: var(--text); font: 500 12.5px Inter, sans-serif; letter-spacing: 0; text-transform: none; }
+.archify-map-scope select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45, 212, 191, .15); }
+.archify-viewport { position: relative; flex: 1 1 auto; min-height: 360px; background: #fff; }
+.archify-frame { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.archify-navigation { position: absolute; bottom: 14px; left: 14px; display: flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255, 255, 255, .92); box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+.archify-navigation button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 9px; border: 0; border-radius: 7px; background: none; color: var(--muted); font-size: 12px; font-weight: 500; }
+.archify-navigation button:hover { background: rgba(148, 163, 184, .1); color: var(--text); }
+.archify-map-state { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; padding: 35px; text-align: center; color: var(--muted); background: var(--bg-deep); }
+.archify-map-state svg { color: var(--accent); }
+.archify-map-state strong { color: var(--text); font-size: 14px; font-weight: 600; }
+.archify-map-state p { margin: 0; max-width: 520px; max-height: 180px; overflow: auto; font-size: 12px; line-height: 1.7; white-space: pre-line; }
+.archify-map-state small { max-width: 330px; font-size: 11px; line-height: 1.6; color: var(--muted-2); }
+.archify-map-state--error svg, .archify-map-state--error strong { color: var(--st-unowned); }
+.archify-map-footer { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 7px 14px; padding: 8px 14px; border-top: 1px solid var(--line); color: var(--muted); background: var(--panel-2); font-size: 11px; line-height: 1.4; }
+.archify-map-footer > span { display: inline-flex; align-items: center; gap: 6px; }
+.archify-map-footer svg { color: var(--st-verified); }
 .archify-loading { animation: archify-spin 1.1s linear infinite; }
 @keyframes archify-spin { to { transform: rotate(360deg); } }
-@media (max-width: 620px) { .archify-map-scope { grid-template-columns: 1fr; gap: 8px; } .archify-map-footer { font-size: 8px; } }
-@media (prefers-reduced-motion: reduce) { .archify-loading { animation: none; } }
+
+/* Scenario spotlight: a scanning red glow around the map while affected records are focused. */
+.archify-shell.is-rippling .archify-viewport::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(225, 29, 72, .35), inset 0 0 60px -10px rgba(225, 29, 72, .35); animation: spotlight 2.6s ease-out forwards; }
+.archify-shell.is-rippling .archify-viewport::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; z-index: 2; pointer-events: none; background: linear-gradient(90deg, transparent, var(--st-unowned), transparent); box-shadow: 0 0 16px var(--st-unowned); animation: sweep 1.3s ease-in-out 2; }
+.archify-shell.is-rippling .archify-map-footer > span:last-child { color: var(--st-unowned); }
+@keyframes spotlight { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes sweep { from { top: 0; } to { top: 100%; opacity: 0; } }
+
+@media (max-width: 620px) { .archify-map-scope { grid-template-columns: 1fr; gap: 8px; } }
+@media (prefers-reduced-motion: reduce) { .archify-loading, .archify-shell.is-rippling .archify-viewport::before, .archify-shell.is-rippling .archify-viewport::after { animation: none; } }

@@ -26,6 +26,14 @@ npm run preview -- --port 4174 --strictPort
 
 The Archify renderer is served by the included Vite plugin in both development and preview. Serving `dist/` as static files alone will not provide the map-rendering endpoint.
 
+## Demo highlights
+
+- **Key-person stress test**: simulates every colleague leaving, ranks them by resilience lost and flags single points of failure (a vacated role with no recorded deputy). Select a row to play that departure.
+- **Scenario spotlight**: when a scenario runs, the Archify map focuses every affected record in view; *Replay ripple* runs it again.
+- **Resilience score**: a live 0–100 gauge (roles 40%, controls 30%, requirements 30%) with the change against baseline. It is a planning indicator, not a compliance rating.
+- **Command palette** (`⌘K` / `Ctrl+K`): simulate departures, jump to any record, ask the map or switch pages from the keyboard.
+- **Change loop tracker**: the sidebar shows progress through explore → trace → plan → evidence, and each step is clickable.
+
 ## Try the complete loop
 
 1. Choose **Someone leaves → Maya Chen**, the Head of Media. Inspect the missing owner, affected controls and configured accountability route.
