@@ -1,3 +1,5 @@
+https://drive.google.com/file/d/1lB5UrBpmTH9w5Yjg470VEwNFIWDC7ZOa/view?usp=sharing
+
 # Mandate — GRC impact canvas
 
 See how people changes affect responsibility, risk and compliance evidence.
