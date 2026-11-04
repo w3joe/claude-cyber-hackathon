@@ -1,6 +1,6 @@
 # Mandate — GRC impact canvas
 
-**Work in progress.** This first checkpoint contains the local app foundation and shared domain model. The interactive canvas, scenario engine, handover workflow and reports are being implemented.
+**Work in progress.** This checkpoint implements the local interactive canvas, scenario engine, proposed and verified handovers, local graph questions, plan import/export and printable reports. The requested Archify renderer is being integrated in a separate update.
 
 A planning tool for a fictional small office. It connects people, roles, systems, controls and requirements so a team can explore someone joining, changing role or leaving. Proposed repairs remain pending until the required authority, acceptance and evidence are recorded.
 
@@ -22,7 +22,7 @@ npm run build
 
 - Fictional sample data, browser-local planning and reports.
 - No changes to external accounts or permissions.
-- No paid AI calls. The planned question panel uses explicit rules and graph evidence.
+- No paid AI calls. The question panel uses explicit rules and graph evidence.
 - Recorded checks are planning assertions, not independent regulatory certification.
 
-The completed MVP will replace this checkpoint notice with verified capabilities and usage instructions.
+Current verification: 56 focused tests and the production build pass. Browser review and Archify integration are in progress.
