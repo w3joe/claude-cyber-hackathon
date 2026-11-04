@@ -148,9 +148,9 @@ The office is currently maintained in source, not through an organisation editor
 
 ## Screenshots / Demo
 
-![Mandate showing a departure scenario, an Archify control map and the question panel](docs/images/mandate-mvp.jpg)
+![Mandate showing Maya Chen's departure: resilience score, affected-record counts, the Archify responsibility map and the key-person stress test](docs/images/mandate-mvp.jpg)
 
-The screenshot shows the fictional office during the MVP browser check. Run the demo locally using the installation steps; **no public hosted application URL is configured in this repository**.
+The screenshot shows the fictional office with the Head of Media departure scenario running. Run the demo locally using the installation steps; **no public hosted application URL is configured in this repository**.
 
 The example responsibility map includes [editable JSON](docs/diagrams/mandate-head-media.architecture.json), [standalone interactive HTML](docs/diagrams/mandate-head-media.html), a [delivery receipt](docs/diagrams/mandate-head-media.receipt.json) and [browser evidence](docs/diagrams/mandate-head-media.visual-check.html). Open the HTML locally after cloning; GitHub normally displays HTML source rather than running the viewer.
 
