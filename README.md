@@ -35,6 +35,11 @@ The interactive canvas connects people, roles, systems, controls and requirement
 - **Self-healing plans:** propose handovers; confirmation requires an eligible owner, an independent authorised decision-maker, acceptance, authority, readiness and an evidence reference.
 - **Evidence-aware reporting:** distinguish coverage, pending proposals, verification recorded in the plan, missing evidence and unresolved risks. A new owner does not refresh stale control evidence.
 - **Local questions:** ask about impact, ownership, candidates and evidence using rules grounded in the current graph. Hypothetical questions offer a scenario preview before changing the plan.
+- **Key-person stress test:** simulates every colleague leaving, ranks them by resilience lost and flags single points of failure (a vacated role with no recorded deputy). Select a row to play that departure.
+- **Resilience score:** a live 0–100 gauge (roles 40%, controls 30%, requirements 30%) with the change against baseline. A planning indicator, not a compliance rating.
+- **Scenario spotlight:** running a scenario focuses every affected record on the Archify map; **Replay ripple** runs it again.
+- **Command palette:** press `⌘K` / `Ctrl+K` to simulate departures, jump to any record, ask the map or switch pages.
+- **Change loop tracker:** the sidebar tracks explore → trace → plan → evidence, and each step is clickable.
 - **Portable records:** autosave locally, undo recent changes, import/export plans, and download HTML or Markdown reports and editable Archify JSON.
 
 ## Tech Stack

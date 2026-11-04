@@ -12,6 +12,10 @@ export interface GraphCanvasProps {
   highlightedNodeIds: string[];
   focus: 'all' | 'affected';
   category: 'all' | Category;
+  /** Hop distance from the scenario origin (kept for callers; Archify reveals the affected set). */
+  distances?: Map<string, number>;
+  /** Changes whenever a scenario runs or is replayed; the map then spotlights the affected records. */
+  rippleKey?: string;
 }
 interface DeliveredMap { html: string; receipt: Record<string, unknown>; specification: ArchifySpecification; sourceHash: string; url: string; }
 interface ArchifyWindow extends Window {
@@ -27,7 +31,7 @@ function saveFile(name: string, content: string, type: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export default function GraphCanvas({ snapshot, selectedNodeId, onSelectNode, highlightedNodeIds, focus, category }: GraphCanvasProps) {
+export default function GraphCanvas({ snapshot, selectedNodeId, onSelectNode, highlightedNodeIds, focus, category, rippleKey }: GraphCanvasProps) {
   const shell = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const selectRef = useRef(onSelectNode);
@@ -35,6 +39,11 @@ export default function GraphCanvas({ snapshot, selectedNodeId, onSelectNode, hi
   const [delivery, setDelivery] = useState<DeliveredMap | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rippling, setRippling] = useState(false);
+  const lastRipple = useRef(rippleKey);
+  const pendingRipple = useRef(false);
+  const loadedSpecification = useRef('');
+  const rippleTimer = useRef<number | undefined>(undefined);
   const scopeSelection = selectionForMap(selectedNodeId, highlightedNodeIds);
   const map = useMemo(() => makeArchifyMap(snapshot, scopeSelection, focus, category), [snapshot, scopeSelection, focus, category]);
   const specificationText = JSON.stringify(map.specification);
@@ -86,6 +95,8 @@ export default function GraphCanvas({ snapshot, selectedNodeId, onSelectNode, hi
       runtime.view.reset();
       for (let scale = 1; scale < targetScale; scale += 0.25) runtime.view.zoomIn();
     }
+    loadedSpecification.current = specificationText;
+    runRipple();
   }
 
   function applyHighlights() {
@@ -96,6 +107,28 @@ export default function GraphCanvas({ snapshot, selectedNodeId, onSelectNode, hi
     else runtime.focus.clear({ updateUrl: false, preserveView: true });
   }
   useEffect(() => { if (delivery) applyHighlights(); }, [highlightedNodeIds.join('|'), selectedNodeId, delivery]);
+
+  // Spotlight every affected record in view when a scenario runs or is replayed, then restore the normal view.
+  // The map re-renders after a scenario, so the spotlight waits until the new viewer has loaded.
+  function runRipple() {
+    const runtime = (frame.current?.contentWindow as ArchifyWindow | null)?.Archify;
+    // Only spotlight once the viewer is showing the current scenario's map, not the previous one.
+    if (!pendingRipple.current || !runtime || loadedSpecification.current !== specificationText) return;
+    pendingRipple.current = false;
+    const affected = Object.keys(map.nodeIds).filter(id => snapshot.nodes.find(node => node.id === map.nodeIds[id])?.affected);
+    if (!affected.length) return;
+    runtime.focus.setMany(affected, { toggle: false, hideChip: true, updateUrl: false, mode: 'selection' });
+    setRippling(true);
+    window.clearTimeout(rippleTimer.current);
+    rippleTimer.current = window.setTimeout(() => { setRippling(false); applyHighlights(); }, 2600);
+  }
+  useEffect(() => {
+    if (lastRipple.current === rippleKey) return;
+    lastRipple.current = rippleKey;
+    pendingRipple.current = true;
+    runRipple();
+  }, [rippleKey]);
+  useEffect(() => () => window.clearTimeout(rippleTimer.current), []);
 
   const navigate = (action: 'zoomIn' | 'zoomOut' | 'reset') => (frame.current?.contentWindow as ArchifyWindow | null)?.Archify?.view[action]();
 
@@ -111,7 +144,7 @@ export default function GraphCanvas({ snapshot, selectedNodeId, onSelectNode, hi
   const role = snapshot.office.roles.find(item => item.id === map.roleId);
 
   return (
-    <div className="graph-shell archify-shell" ref={shell} aria-label="Archify responsibility map">
+    <div className={`graph-shell archify-shell${rippling ? ' is-rippling' : ''}`} ref={shell} aria-label="Archify responsibility map">
       <div className="archify-map-toolbar">
         <div className="archify-map-identity"><Network size={17} aria-hidden="true" /><span>Archify canvas</span></div>
         <div className="archify-map-actions">
@@ -132,7 +165,7 @@ export default function GraphCanvas({ snapshot, selectedNodeId, onSelectNode, hi
       </div>
       <div className="archify-map-footer">
         <span>{delivery ? <CheckCircle2 size={12} aria-hidden="true" /> : <Network size={12} aria-hidden="true" />}{delivery ? 'Validated Archify map' : 'Archify architecture renderer'}</span>
-        <span>{map.empty ? 'No scenario-affected items in this view' : highlightsInScope ? `${highlightsInScope} answer items in this view` : 'Drag to explore · Open full viewer to search and trace'}</span>
+        <span>{rippling ? 'Spotlighting records affected by this scenario' : map.empty ? 'No scenario-affected items in this view' : highlightsInScope ? `${highlightsInScope} answer items in this view` : 'Drag to explore · Open full viewer to search and trace'}</span>
       </div>
     </div>
   );
