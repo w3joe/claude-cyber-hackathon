@@ -160,6 +160,20 @@ The office is currently maintained in source, not through an organisation editor
 
 The screenshot shows the fictional office with the Head of Media departure scenario running. Run the demo locally using the installation steps; **no public hosted application URL is configured in this repository**.
 
+### Animated walkthroughs
+
+These GIFs show real interactions in the local app with the fictional Northstar Studio office.
+
+**Departure impact.** Select Maya in the key-person stress test. The canvas shows the Head of Media responsibility without an owner and highlights the affected controls and requirements.
+
+![Animated demonstration of Maya leaving and the resulting ownership and control gaps](docs/demos/departure-impact.gif)
+
+**Proposed to confirmed handover.** Choose Ellis as the recorded deputy, save a proposal, then record Ava as the authorised decision-maker, the required checks and a fictional handover evidence reference. The plan then records Ellis as the owner; unrelated evidence gaps remain open.
+
+![Animated demonstration of proposing Ellis and confirming the handover after recording authority, acceptance, readiness and an evidence reference](docs/demos/handover-confirmation.gif)
+
+The recorded checks are user assertions in a demonstration plan. They do not change real accounts, contact the named people or independently validate compliance evidence.
+
 The example responsibility map includes [editable JSON](docs/diagrams/mandate-head-media.architecture.json), [standalone interactive HTML](docs/diagrams/mandate-head-media.html), a [delivery receipt](docs/diagrams/mandate-head-media.receipt.json) and [browser evidence](docs/diagrams/mandate-head-media.visual-check.html). Open the HTML locally after cloning; GitHub normally displays HTML source rather than running the viewer.
 
 ## API / CLI Reference
