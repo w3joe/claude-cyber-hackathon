@@ -1,65 +1,223 @@
 # Mandate — GRC impact canvas
 
-Explore what happens to a small office when someone joins, changes role or leaves. Mandate connects people, responsibilities, systems, controls and requirements on an interactive Archify canvas. It makes ownership gaps visible and proposes handovers with an explicit approval and evidence record.
+See how people changes affect responsibility, risk and compliance evidence.
 
-This is a local MVP using **fictional Northstar Studio data**. It does not change company accounts, send handover messages or certify regulatory compliance.
+**Local MVP · Fictional office data · No paid AI service required**
 
-## Run locally
+## Description
 
-Requires Node.js 22.12 or newer and npm.
+Mandate is a governance, risk and compliance (GRC) planning tool for small-office managers, operations teams and security practitioners. When a department head leaves, removing their account does not answer who can approve work or own a control afterwards. Mandate makes those dependencies visible and helps record a proposed handover, its decision-maker and supporting evidence.
 
-```sh
-npm ci
-npm start
+The interactive canvas connects people, roles, systems, controls and requirements. Explore someone joining, moving role or leaving, then inspect the impact and export a report. The supplied **Northstar Studio** office is fictional: the app does not revoke access, contact colleagues, inspect external evidence or certify compliance.
+
+## Table of Contents
+
+- [Description](#description)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Screenshots / Demo](#screenshots--demo)
+- [API / CLI Reference](#api--cli-reference)
+- [Tests](#tests)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact / Support](#contact--support)
+
+## Features
+
+- **Interactive Archify canvas:** responsibility overviews and control details, node inspection, zoom/pan, search and route tracing in the full viewer.
+- **Join, move and leave scenarios:** highlight affected records and compare with the original office.
+- **Governance and ownership checks:** trace configured accountability, identify available deputies and show unresolved approval gaps.
+- **Self-healing plans:** propose handovers; confirmation requires an eligible owner, an independent authorised decision-maker, acceptance, authority, readiness and an evidence reference.
+- **Evidence-aware reporting:** distinguish coverage, pending proposals, verification recorded in the plan, missing evidence and unresolved risks. A new owner does not refresh stale control evidence.
+- **Local questions:** ask about impact, ownership, candidates and evidence using rules grounded in the current graph. Hypothetical questions offer a scenario preview before changing the plan.
+- **Portable records:** autosave locally, undo recent changes, import/export plans, and download HTML or Markdown reports and editable Archify JSON.
+
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| Interface | React 19, TypeScript 5, CSS, Lucide icons |
+| Domain logic | Deterministic TypeScript rules and a fictional office model |
+| Build and local server | Vite 7 with the React plugin and a custom Node.js renderer plugin |
+| Canvas | Bundled Archify architecture renderer, typed JSON and interactive HTML viewer |
+| Persistence | Browser `localStorage`; JSON file import/export |
+| Tests | Vitest 3; Archify validation and browser evidence |
+
+There is no database server, cloud backend, message queue or external AI dependency. Exact dependency versions are recorded in [package-lock.json](package-lock.json).
+
+## Architecture Overview
+
+```mermaid
+flowchart LR
+    User[Office planner] --> UI[React interface]
+    subgraph Browser
+        UI --> Rules[Scenario and handover rules]
+        UI <--> Store[(Browser localStorage)]
+        Rules --> Map[Archify map specification]
+        UI --> Files[Plan and report downloads]
+        Viewer[Embedded Archify viewer]
+    end
+    subgraph LocalNode[Local Node.js process]
+        API[Vite renderer endpoint] --> CLI[Bundled Archify CLI]
+        CLI --> API
+    end
+    Map -->|JSON over loopback HTTP| API
+    API -->|Render result and receipt| UI
+    API -->|HTML at the returned map URL| Viewer
+    Viewer -->|Selected node| UI
 ```
 
-Open **http://127.0.0.1:4173/**. On macOS, double-click `Start Mandate.command` as an alternative. The launcher installs locked dependencies if they are missing, reuses an existing local Mandate server and opens the app. Internet access is needed for the initial dependency installation; the app and questions run locally afterwards.
+Scenario evaluation, questions and reports run in the browser. The local Node.js endpoint validates and renders the map, while plans persist in browser storage and can be downloaded as files. No company systems or external services are connected; see [ARCHITECTURE.md](ARCHITECTURE.md) for the data model, approval rules, boundaries and deployment limits.
 
-For development or a built preview:
+## Installation
+
+1. Install **Git, Node.js 22.12 or newer, and npm**. A modern desktop browser is recommended.
+2. Clone the repository and install the locked dependencies:
+
+   ```sh
+   git clone https://github.com/w3joe/claude-cyber-hackathon.git
+   cd claude-cyber-hackathon
+   npm ci
+   ```
+
+3. Start the app:
+
+   ```sh
+   npm start
+   ```
+
+4. Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/).
+
+The initial dependency installation needs internet access. Normal app use and map rendering are local afterwards; no account or API key is required. On macOS, [Start Mandate.command](Start%20Mandate.command) is an alternative launcher: it installs dependencies if absent, opens the browser and reuses an existing Mandate server on port 4173.
+
+## Usage
+
+### Explore a department head leaving
+
+1. Choose **Someone leaves → Maya Chen → Explore impact**.
+2. Select **Head of Media** and inspect the owner gap, accountability route and affected controls.
+3. Open **Repair plan** and propose Ellis, the recorded media deputy. The proposal leaves ownership unfilled.
+4. Record an eligible independent decision-maker and the required handover checks and evidence reference. Confirmation changes the planning state only.
+5. Open **Evidence report** and export the result. The stale recovery evidence remains visible after a valid media handover.
+6. Try **Someone joins**, **Role changes**, or ask **“What happens if the head of media leaves?”** in the side panel.
+
+### Save and compare
+
+Use **Save plan** to download JSON and **Import** to reopen it. **Compare baseline** temporarily shows the original office without discarding the scenario. A plan holds one active scenario and its handovers; applying a new scenario replaces the previous one. **Undo last change** retains up to ten earlier plans during the current session.
+
+Browser storage is specific to the browser and origin. `localhost`, `127.0.0.1` and different ports have separate saved plans. Export a copy before changing address, clearing browser data or moving to another device.
+
+### Development and built preview
 
 ```sh
+# Development, with a fixed local port
 npm run dev -- --port 4173 --strictPort
-npm test
+
+# Compile and preview the built application
 npm run build
 npm run preview -- --port 4174 --strictPort
 ```
 
-The Archify renderer is served by the included Vite plugin in both development and preview. Serving `dist/` as static files alone will not provide the map-rendering endpoint.
+The preview command serves the built app at [http://127.0.0.1:4174/](http://127.0.0.1:4174/). Both server modes include the Archify endpoint. A static upload of `dist/` alone cannot render new maps; the preview server is for local checking, not a production hosting design.
 
-## Try the complete loop
+## Configuration
 
-1. Choose **Someone leaves → Maya Chen**, the Head of Media. Inspect the missing owner, affected controls and configured accountability route.
-2. Switch between responsibilities and control details on the Archify canvas. Select a node to inspect its evidence and connected records. Open the full viewer for search and route tracing.
-3. Open **Repair plan** and propose Ellis, the recorded media deputy. A proposal does not appoint an owner or close the gap.
-4. Record an eligible independent decision-maker, acceptance, authority, readiness and an evidence reference to confirm a handover in the plan. Missing or invalid checks prevent confirmation.
-5. Review **Evidence report**. It separates covered, proposed, verified-in-plan, unknown and unresolved records. The stale recovery evidence remains visible after a media handover.
-6. Try a new starter or role change, compare the baseline, or ask **“What happens if the head of media leaves?”** in the question panel.
+No environment file or secret is required for the MVP.
 
-The question panel uses local rules and the current graph. It supports ownership, impact, handover and evidence questions; it is not an unrestricted AI chat. A hypothetical question offers a preview before changing the scenario.
+| Setting | Location / behaviour |
+| --- | --- |
+| Office, roles and controls | [src/domain/seed.ts](src/domain/seed.ts); fictional baseline compiled into the app |
+| Shared data types | [src/domain/types.ts](src/domain/types.ts) |
+| Renderer plugin | [vite.config.ts](vite.config.ts) and [server/archify.mjs](server/archify.mjs) |
+| Default launcher address | `127.0.0.1:4173` in [scripts/start-local.mjs](scripts/start-local.mjs) |
+| Alternate development/preview port | Pass `--port` and `--strictPort` as shown above |
+| Saved plan key | `mandate-grc-plan-v1` in browser `localStorage` |
+| Archify update checks | The renderer subprocess sets `ARCHIFY_UPDATE_CHECK_DISABLED=1` |
 
-## What “self-healing” means here
+The office is currently maintained in source, not through an organisation editor. Plan imports refer to this office model; they are not arbitrary office imports. Unreadable saved plans are preserved in separate recovery keys before replacement, and saving is blocked if a recovery copy cannot be retained.
 
-Mandate traces gaps and offers candidates from recorded deputies, eligibility and the configured accountability chain. Suggested repairs remain proposals. Confirmation records a human assertion within the plan; it does not independently check a company system.
+## Screenshots / Demo
 
-Seniority alone does not create authority. An unresolved chain remains unresolved, and a candidate cannot authorise their own appointment. Changing an owner or authoriser clears the relevant confirmation fields. Existing stale or missing control evidence cannot be repaired merely by assigning a new person.
+![Mandate showing a departure scenario, an Archify control map and the question panel](docs/images/mandate-mvp.jpg)
 
-## Plans, exports and scope
+The screenshot shows the fictional office during the MVP browser check. Run the demo locally using the installation steps; **no public hosted application URL is configured in this repository**.
 
-- A plan contains one active join, move or leave scenario and its handovers. Starting another scenario replaces the active scenario; Undo retains recent changes during the session.
-- Plans autosave in browser local storage. Use the same browser and address to return to them; `localhost` and `127.0.0.1` have separate storage. Download JSON for a portable copy.
-- Imports are schema-checked. Unreadable saved data is retained in a recovery copy before replacement; if recovery storage fails, overwriting is blocked.
-- Export a printable HTML or Markdown evidence report, or the editable Archify JSON for the current map.
-- The sample commitments are internal policy/customer examples, not a complete legal or regulatory control library.
-- No authentication, shared workspace, immutable audit log, HR/identity integration or independent evidence verification is implemented. A real deployment would need those capabilities and an organisation-specific authority and control model.
+The example responsibility map includes [editable JSON](docs/diagrams/mandate-head-media.architecture.json), [standalone interactive HTML](docs/diagrams/mandate-head-media.html), a [delivery receipt](docs/diagrams/mandate-head-media.receipt.json) and [browser evidence](docs/diagrams/mandate-head-media.visual-check.html). Open the HTML locally after cloning; GitHub normally displays HTML source rather than running the viewer.
 
-## Implementation and validation
+## API / CLI Reference
 
-React and TypeScript provide the interface. A deterministic rules engine evaluates scenarios and handovers. Archify renders typed architecture specifications locally and requires all nine showcase validation checks with no errors or warnings before displaying a new map. Failed renders show an error rather than an older scenario’s map.
+The renderer is an internal local endpoint, not an authenticated integration API.
 
-Tests cover scenario propagation, authority and approval rules, evidence states, questions, reports, plan import/recovery and map generation. Run `npm test` and `npm run build` for the current checks.
+| Method and path | Purpose |
+| --- | --- |
+| `POST /api/archify/render` | Accept `{ "specification": ... }` containing an Archify architecture map with showcase quality; return `html`, `receipt`, `specification`, `sourceHash` and `url` |
+| `GET /api/archify/map/<sha256>.html` | Serve a rendered map while its entry remains in the process cache; return 404 if unavailable |
 
-The example source, checked standalone HTML and delivery receipt are kept in `docs/diagrams/`. These describe the fictional office model; diagram validation establishes layout and specification quality, not business compliance.
+Example request from the project directory while the app is running:
 
-## Archify attribution
+```sh
+node --input-type=module <<'JS'
+import { readFile } from 'node:fs/promises';
+const specification = JSON.parse(await readFile(
+  'docs/diagrams/mandate-head-media.architecture.json', 'utf8'
+));
+const response = await fetch('http://127.0.0.1:4173/api/archify/render', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ specification })
+});
+if (!response.ok) throw new Error(await response.text());
+const result = await response.json();
+console.log(result.url);
+JS
+```
 
-The portable renderer is included in `vendor/archify/`, based on the installed Archify skill (upstream `tt-a1i/archify`, version `2.17.0-dev.1`). Its MIT licence, third-party notices and adaptation note are included there. No separately installed skill, API key or paid AI service is required to run this repository.
+The POST route requires JSON, limits requests to 256 KiB and checks the request host against `Origin` when supplied. Responses include 403 for rejected origins, 405 for unsupported methods on the render route, 413 for oversized bodies, 415 for other content types and 422 for invalid JSON/specifications or render failures. These controls do not provide user authentication.
+
+Validate the bundled example directly, without starting the app:
+
+```sh
+node vendor/archify/bin/archify.mjs validate architecture \
+  docs/diagrams/mandate-head-media.architecture.json --quality showcase --json
+```
+
+## Tests
+
+```sh
+npm test                 # Run the Vitest suite once
+npm run test:watch       # Watch affected tests during development
+npm run build           # Type-check and produce the application bundle
+```
+
+The recorded verification on **4 November 2026** passed **70 tests across six files**, plus the production build. Tests cover scenarios, final-plan approval authority, evidence states, questions, reports, import/recovery, map projection and renderer request constraints. The example map passed all nine Archify showcase checks with zero errors or warnings; [verification notes](docs/verification.md) distinguish automated tests, browser checks and their limits.
+
+## Roadmap
+
+Potential next steps, not implemented commitments:
+
+- An editable office model and versioned multi-event scenarios.
+- Shared workspaces, authentication and role-based permissions.
+- Durable, attributable approval history and independently checked evidence.
+- Organisation-specific control libraries and reviewed HR/identity integrations.
+- Broader accessibility, mobile and performance acceptance testing.
+
+## Contributing
+
+Open an [issue](https://github.com/w3joe/claude-cyber-hackathon/issues) to discuss a bug or proposed change. For a contribution, create a branch, keep the change focused, run the relevant tests and build, then open a [pull request](https://github.com/w3joe/claude-cyber-hackathon/pulls) describing the behaviour and validation.
+
+Preserve the distinction between proposals, recorded verification and independent evidence. Use synthetic data in examples and tests, update the documentation when behaviour changes, and retain third-party licence notices. See the licensing status below before reusing or redistributing the application.
+
+## License
+
+**A project-wide licence for the Mandate application has not been declared.** There is no root `LICENSE` file; the vendored renderer’s licence should not be assumed to cover the application.
+
+The bundled Archify runtime, based on upstream `tt-a1i/archify` version `2.17.0-dev.1`, retains its [MIT licence](vendor/archify/LICENSE), [third-party notices](vendor/archify/THIRD_PARTY_NOTICES.md), [font licence](vendor/archify/assets/JetBrainsMono-OFL.txt) and [adaptation note](vendor/archify/MANDATE-NOTICE.md).
+
+## Contact / Support
+
+Use the [project repository](https://github.com/w3joe/claude-cyber-hackathon) and [GitHub issues](https://github.com/w3joe/claude-cyber-hackathon/issues) for support and feedback. Include reproduction steps, expected behaviour and your Node/browser versions. Keep real company records and credentials out of public reports.
