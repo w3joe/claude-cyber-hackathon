@@ -1,3 +1,4 @@
+import { actionLabel, ruleLabel, ruleSourceLabel } from './odrl';
 import type { Snapshot, Status } from './types';
 
 const label: Record<Status, string> = { covered: 'Recorded coverage', 'at-risk': 'At risk', unowned: 'Unowned', proposed: 'Proposed — pending', verified: 'Verified in plan', unknown: 'Unknown — evidence review', inactive: 'Inactive' };
@@ -25,6 +26,20 @@ function requirementRows(snapshot: Snapshot): string[][] {
   return snapshot.requirements.map(impact => {
     const requirement = snapshot.office.requirements.find(item => item.id === impact.requirementId);
     return [impact.name, requirement?.source ?? 'Not recorded', requirement?.reference ?? 'Not recorded', label[impact.status], impact.reason];
+  });
+}
+
+export const ruleTableHeaders = ['Clause', 'Rule', 'Assignee', 'Action', 'Target', 'Controls', 'Coverage', 'Conditions', 'Quote', 'Evaluation'];
+export function ruleRows(snapshot: Snapshot): string[][] {
+  return snapshot.office.policyGraph.rules.map(rule => {
+    const alignment = snapshot.office.ruleAlignments.find(a => a.ruleId === rule.id);
+    const impact = snapshot.rules.find(i => i.ruleId === rule.id);
+    const role = snapshot.office.roles.find(r => r.id === alignment?.roleId);
+    return [ruleSourceLabel(snapshot.office.policyGraph, rule), ruleLabel[rule.kind], `${rule.source.assigneeQuote} → ${role?.name ?? 'Unmapped'}`, actionLabel(rule.action), rule.source.targetQuote,
+      alignment?.controlIds.length ? `${alignment.controlIds.map(id => snapshot.office.controls.find(c => c.id === id)?.name ?? id).join('; ')} (${alignment.state})` : 'No confirmed control',
+      `${label[impact?.status ?? 'unknown']}. ${impact?.reason ?? ''}`,
+      rule.constraints.length ? rule.constraints.map(c => c.quote).join('; ') + ' (not evaluated)' : 'No conditions expressed',
+      rule.source.quote, impact?.evaluationReason ?? 'Not evaluated'];
   });
 }
 
@@ -63,7 +78,7 @@ export function buildReportMarkdown(snapshot: Snapshot): string {
     `**Evidence needed:** ${md(finding.evidenceNeeded)}`,
     `**Related requirements:** ${md(finding.requirementIds.map(id => snapshot.office.requirements.find(requirement => requirement.id === id)?.name ?? id).join('; ') || 'None recorded')}`, '',
   );
-  lines.push('## Recorded requirements', '', markdownTable(['Requirement', 'Source', 'Reference', 'Plan status', 'Reason'], requirementRows(snapshot)), '', '## Evidence register', '', markdownTable(['Control', 'Evidence status', 'Reference', 'Last checked', 'Responsible role'], evidenceRows(snapshot)), '', '## Review before using this report', '', '- Confirm that the office map and authority chain reflect the actual organisation.', '- Confirm which policies, contracts and regulatory requirements apply.', '- Inspect the referenced evidence and validate the effective permissions and handovers.', '- Keep unresolved findings open and record the responsible decision-maker.', '', limitation, '');
+  lines.push('## Recorded requirements', '', markdownTable(['Requirement', 'Source', 'Reference', 'Plan status', 'Reason'], requirementRows(snapshot)), '', '## ODRL rules', '', 'Coverage is assessed separately from fulfilment, permission applicability and infringement. Conditions and action performance are not evaluated.', '', markdownTable(ruleTableHeaders, ruleRows(snapshot)), '', '## Evidence register', '', markdownTable(['Control', 'Evidence status', 'Reference', 'Last checked', 'Responsible role'], evidenceRows(snapshot)), '', '## Review before using this report', '', '- Confirm that the office map and authority chain reflect the actual organisation.', '- Confirm which policies, contracts and regulatory requirements apply.', '- Inspect the referenced evidence and validate the effective permissions and handovers.', '- Keep unresolved findings open and record the responsible decision-maker.', '', limitation, '');
   return lines.join('\n');
 }
 
@@ -84,6 +99,7 @@ export function buildReportHtml(snapshot: Snapshot): string {
 <section><h2>Proposed and recorded handovers</h2>${snapshot.plan.repairs.length ? htmlTable(['Responsibility', 'Candidate', 'Effective plan status', 'Authorising person', 'Recorded checks', 'Evidence reference', 'Recorded at'], repairRows(snapshot)) : '<p>No handover has been proposed or recorded.</p>'}</section>
 <section><h2>Findings and next actions</h2>${snapshot.findings.length ? snapshot.findings.map(finding => `<article><h3>${esc(finding.title)}</h3><p class="meta">${esc(finding.category)} · ${esc(label[finding.status])} · Accountable: ${esc(name(snapshot, finding.accountablePersonId))}</p><p>${esc(finding.description)}</p><p><strong>Next action:</strong> ${esc(finding.action)}</p><p><strong>Evidence needed:</strong> ${esc(finding.evidenceNeeded)}</p><p><small>Related requirements: ${esc(finding.requirementIds.map(id => snapshot.office.requirements.find(requirement => requirement.id === id)?.name ?? id).join('; ') || 'None recorded')}</small></p></article>`).join('') : '<p>No findings are recorded in this model. This does not establish that all real-world requirements are satisfied.</p>'}</section>
 <section><h2>Recorded requirements</h2>${htmlTable(['Requirement', 'Source', 'Reference', 'Plan status', 'Reason'], requirementRows(snapshot))}</section>
+<section><h2>ODRL rules</h2><p>Coverage is assessed separately from fulfilment, permission applicability and infringement. Conditions and action performance are not evaluated.</p>${htmlTable(ruleTableHeaders, ruleRows(snapshot))}</section>
 <section><h2>Evidence register</h2>${htmlTable(['Control', 'Evidence status', 'Reference', 'Last checked', 'Responsible role'], evidenceRows(snapshot))}</section>
 <section><h2>Review before using this report</h2><ul><li>Confirm that the office map and authority chain reflect the actual organisation.</li><li>Confirm which policies, contracts and regulatory requirements apply.</li><li>Inspect the referenced evidence and validate effective permissions and handovers.</li><li>Keep unresolved findings open and record the responsible decision-maker.</li></ul></section>
 <footer>${esc(limitation)}</footer></main></body></html>`;

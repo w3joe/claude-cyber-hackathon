@@ -364,3 +364,12 @@ kbd { display: inline-flex; align-items: center; gap: 2px; font: 500 10.5px var(
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+.policy-rules { display: grid; gap: 16px; }
+.policy-rule { border: 1px solid var(--border, #dbe2dc); border-radius: 10px; padding: 16px; min-width: 0; }
+.policy-rule dl { margin: 14px 0; display: grid; gap: 10px; }
+.policy-rule dt { font-size: 11px; color: var(--muted, #617267); }
+.policy-rule dd { margin: 3px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+.policy-rule blockquote { margin: 12px 0; padding: 8px 12px; border-left: 3px solid #7e9470; background: #f3f5ee; font-size: 13px; }
+.report-page .policy-rules { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.report-page .policy-rules > p { grid-column: 1 / -1; }

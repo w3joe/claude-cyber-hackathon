@@ -41,6 +41,7 @@ The supplied **Northstar Studio** office is fictional: the app does not revoke a
 - **Join, move and leave scenarios:** highlight affected records and compare with the original office.
 - **Governance and ownership checks:** trace configured accountability, identify available deputies and show unresolved approval gaps.
 - **Self-healing plans:** propose handovers; confirmation requires an eligible owner, an independent authorised decision-maker, acceptance, authority, readiness and an evidence reference.
+- **ODRL policy cards:** Must / May / Must not rules with quoted sources, confirmed office alignments and JSON-LD export using the [Mandate ODRL 2.2 profile](docs/odrl/profile.md). Coverage is assessed separately from rule fulfilment; conditions and action performance are not evaluated.
 - **Evidence-aware reporting:** distinguish coverage, pending proposals, verification recorded in the plan, missing evidence and unresolved risks. A new owner does not refresh stale control evidence.
 - **Local questions:** ask about impact, ownership, candidates and evidence using rules grounded in the current graph. Hypothetical questions offer a scenario preview before changing the plan.
 - **Key-person stress test:** simulates every colleague leaving, ranks them by resilience lost and flags single points of failure (a vacated role with no recorded deputy). Select a row to play that departure.
@@ -152,6 +153,8 @@ No environment file or secret is required for the MVP.
 | Saved plan key | `mandate-grc-plan-v1` in browser `localStorage` |
 | Archify update checks | The renderer subprocess sets `ARCHIFY_UPDATE_CHECK_DISABLED=1` |
 
+Policies and rules are authored in [src/domain/policy-seed.ts](src/domain/policy-seed.ts). Control-to-requirement links are derived from confirmed rule alignments. The rule layer supports a bounded ODRL 2.2 profile, not every ODRL construct; [profile details and limitations](docs/odrl/profile.md) include the JSON-LD reader/export contract. Download ODRL JSON-LD from Evidence report. Policy editing, AI extraction and policy import through the UI are not implemented.
+
 The office is currently maintained in source, not through an organisation editor. Plan imports refer to this office model; they are not arbitrary office imports. Unreadable saved plans are preserved in separate recovery keys before replacement, and saving is blocked if a recovery copy cannot be retained.
 
 ## Screenshots / Demo
@@ -221,7 +224,7 @@ npm run test:watch       # Watch affected tests during development
 npm run build           # Type-check and produce the application bundle
 ```
 
-The recorded verification on **4 November 2026** passed **70 tests across six files**, plus the production build. Tests cover scenarios, final-plan approval authority, evidence states, questions, reports, import/recovery, map projection and renderer request constraints. The example map passed all nine Archify showcase checks with zero errors or warnings; [verification notes](docs/verification.md) distinguish automated tests, browser checks and their limits.
+The ODRL migration verification on **4 November 2026** passed **104 tests across ten files**, plus the production build. It includes independent JSON-LD expansion, source/alignment integrity and rule presentation checks. Tests cover scenarios, final-plan approval authority, evidence states, questions, reports, import/recovery, map projection and renderer request constraints. The example map passed all nine Archify showcase checks with zero errors or warnings; [verification notes](docs/verification.md) distinguish automated tests, browser checks and their limits.
 
 ## Roadmap
 

@@ -193,7 +193,10 @@ describe('handover authority and evidence', () => {
     expect(validateRepair(result, record)).toEqual([]);
     expect(result.roles.find(role => role.roleId === 'head-media')).toMatchObject({ ownerId: 'ellis', status: 'verified' });
     expect(node(result, 'c:campaign-approval').status).toBe('verified');
-    expect(node(result, 'q:media-permissions').status).toBe('verified');
+    // The newly modelled retention clause still has no supporting control.
+    expect(node(result, 'q:media-permissions').status).toBe('unknown');
+    expect(node(result, 'q:media-permissions').reason).toContain('not mapped to a confirmed control');
+    expect(node(result, 'q:release-policy').status).toBe('verified');
     expect(result.edges.some(edge => edge.source === 'p:ellis' && edge.target === 'r:head-media' && edge.label === 'handover recorded')).toBe(true);
   });
 

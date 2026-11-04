@@ -1,0 +1,28 @@
+@prefix mandate: <urn:mandate:vocab:> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:mandate:profile:1> dcterms:title "Mandate ODRL profile version 1" ;
+  dcterms:description "ODRL 2.2 policy expressions with a separate office-control coverage assessment. See profile.md for supported shapes, datatypes and processing limits." .
+
+mandate:approveCampaign a odrl:Action ; rdfs:comment "Authorise a material campaign release and record the decision." .
+mandate:checkMediaRights a odrl:Action ; rdfs:comment "Check and record media permissions and licence scope." .
+mandate:reviewAdministratorAccess a odrl:Action ; rdfs:comment "Review and record administrator access to publishing channels." .
+mandate:removeAccess a odrl:Action ; rdfs:comment "Remove a departed colleague's studio access and record completion." .
+mandate:testRecovery a odrl:Action ; rdfs:comment "Perform a recovery exercise and retain its evidence." .
+mandate:recordCustomerApproval a odrl:Action ; rdfs:comment "Record a customer's campaign approval." .
+mandate:retainPermissionRecords a odrl:Action ; rdfs:comment "Retain the media permission records in the target system." .
+mandate:administerPublishing a odrl:Action ; rdfs:comment "Administer the target publishing channels." .
+mandate:publishUnapprovedCampaign a odrl:Action ; rdfs:comment "Publish a campaign for which required approval is absent." .
+
+mandate:maximumReviewInterval a odrl:LeftOperand ; rdfs:comment "Elapsed calendar-month interval between successive reviews. Compare with lteq and a positive whole-month xsd:duration. Requires an initial review date and assessment time; not evaluated by Mandate v1." .
+mandate:retentionPeriod a odrl:LeftOperand ; rdfs:comment "Calendar-month retention period from creation of permission records. Compare with gteq and a positive whole-month xsd:duration; not evaluated by Mandate v1." .
+mandate:beforeRelease a odrl:LeftOperand ; rdfs:comment "Whether the rule's action occurs before its associated campaign release. Compare with eq and true typed xsd:boolean; requires linked action/release events and is not evaluated by Mandate v1." .
+
+mandate:quote a rdf:Property ; rdfs:range xsd:string ; rdfs:comment "Verbatim source clause on a rule, or relevant wording on a constraint." .
+mandate:assigneeQuote a rdf:Property ; rdfs:range xsd:string ; rdfs:comment "Verbatim source wording identifying the rule's assignee." .
+mandate:actionQuote a rdf:Property ; rdfs:range xsd:string ; rdfs:comment "Verbatim source wording identifying the rule's action." .
+mandate:targetQuote a rdf:Property ; rdfs:range xsd:string ; rdfs:comment "Verbatim source wording identifying the rule's target." .

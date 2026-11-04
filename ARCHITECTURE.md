@@ -66,7 +66,7 @@ The interface uses React 19, TypeScript and Lucide icons. It recomputes the curr
 
 ### Office model and domain engine
 
-[seed.ts](src/domain/seed.ts) contains the fictional Northstar Studio office: seven people, eight responsibilities, four systems, six controls and five internal policy or customer commitment requirements. The vacant assurance responsibility and stale recovery-test evidence are intentional demonstration conditions.
+[seed.ts](src/domain/seed.ts) contains the fictional Northstar Studio office: seven people, eight responsibilities, four systems, six controls and five internal policy or customer commitment requirements. The vacant assurance responsibility and stale recovery-test evidence are intentional demonstration conditions. [policy-seed.ts](src/domain/policy-seed.ts) adds four policy documents, eleven provisions, a definition and nine ODRL rules; the permission-record retention rule deliberately lacks a control.
 
 [engine.ts](src/domain/engine.ts) implements the pure `evaluateOffice(office, plan)` calculation. It derives effective people, role ownership, accountability, findings, graph nodes and edges, requirement statuses and summary counts. It does not mutate the seed or contact external systems.
 
@@ -82,9 +82,17 @@ The engine applies these rules:
 
 This is a **final-plan model**, not a historical approvals ledger. A confirmation that was valid against an earlier organisation may cease to be effective after an upstream change. The resulting gap remains visible instead of retaining stale authority.
 
+### ODRL policy rules and coverage
+
+[odrl.ts](src/domain/odrl.ts) serialises policy documents as ODRL 2.2 Sets under the [Mandate version 1 profile](docs/odrl/profile.md). Standalone duties use `obligation`; permissions and prohibitions retain their distinct meanings. The strict canonical JSON-LD reader rejects unsupported profiles, contexts, terms and constructs. It returns policy expressions without importing trusted office alignments. The profile includes machine-readable vocabulary and a [complete seeded export](docs/odrl/policies.example.jsonld).
+
+[policy-graph.ts](src/domain/policy-graph.ts) derives control-to-requirement links from confirmed alignments and assesses assignee, target and control coverage after office dependencies are evaluated. Requirement views aggregate descendants and explicitly referenced provisions with cycle protection. Rule cards remain in the inspector and report, while requirement map nodes display coverage counts. Suggested or unmatched alignments remain unknown; the unimplemented retention control is reported from its quoted clause.
+
+Coverage is distinct from ODRL fulfilment, permission applicability and prohibition infringement. All rule evaluations remain `not-evaluated`: neither timing nor action performance is established by an owned control or a handover. Potential opposing rules on the same party, action and target invalidate the document's coverage assessment pending review. This release has no general ODRL execution engine, AI extractor, policy editor or policy-import UI. Policies remain source-authored, so plan persistence is unchanged.
+
 ### Local question answering
 
-[questions.ts](src/domain/questions.ts) interprets a bounded set of questions using deterministic text matching and the current snapshot. It supports departure impact, ownership gaps, candidate handovers, accountability, requirements and missing evidence. Names and role labels are normalised for case and accents.
+[questions.ts](src/domain/questions.ts) interprets a bounded set of questions using deterministic text matching and the current snapshot. It supports departure impact, ownership gaps, candidate handovers, accountability, requirements, quoted policy-rule gaps and missing evidence. Names and role labels are normalised for case and accents.
 
 Answers contain explanations and graph node IDs to highlight. A clear departure question can return a suggested scenario, but cannot apply it. The user must choose to apply the suggestion, which replaces the active scenario and repairs. Ambiguous or unsupported questions return clarification or supported examples. There is no language model, remote inference service or independent knowledge base.
 
@@ -117,7 +125,7 @@ The vendored runtime is described in [MANDATE-NOTICE.md](vendor/archify/MANDATE-
 
 [storage.ts](src/domain/storage.ts) persists only the versioned `Plan` under `mandate-grc-plan-v1` in `localStorage`. The office model remains in source, and the snapshot is recalculated. JSON plan export provides an explicit file copy; import does not replace the office model.
 
-[report.ts](src/domain/report.ts) produces Markdown and standalone printable HTML from the snapshot. Reports include scenario metadata, baseline versus planned ownership, accountability, repair assertions, requirement sources, evidence references and recorded check dates. HTML values are escaped, and the report needs no external scripts or assets. Reports are generated and downloaded in the browser; the rendering service does not store them.
+[report.ts](src/domain/report.ts) produces Markdown and standalone printable HTML from the snapshot. Reports include scenario metadata, baseline versus planned ownership, accountability, repair assertions, requirement sources, ODRL rule tables, evidence references and recorded check dates. The report page also exports policy expressions as ODRL JSON-LD. HTML values are escaped, and the report needs no external scripts or assets. Reports are generated and downloaded in the browser; the rendering service does not store them.
 
 ## Data Flow
 
@@ -280,7 +288,7 @@ Vitest covers domain behaviour, imports, questions, reports, map generation and 
 
 These are possible next steps, not implemented features or delivery commitments:
 
-- Add office editing, explicit policy provenance and versioned migration rules before importing real organisation data.
+- Add office and policy editing, authenticated provenance and versioned migration rules before importing real organisation data.
 - Introduce authenticated users and independently accepted handovers, with an append-only history distinct from the final-plan model.
 - Connect evidence to controlled repositories with access checks, retention rules, provenance and explicit freshness policies.
 - Add approved HR and identity-system connectors only with a clear separation between simulation, approval and execution.

@@ -112,7 +112,7 @@ export function makeArchifyMap(snapshot: Snapshot, selectedNodeId: string | null
   });
   const components = [...included.values()].map(({ node, position }) => ({
     id: archifyId(node.id), type: kinds[node.type], label: conciseLabels[node.entityId] ?? node.label,
-    sublabel: node.type === 'role' ? short(node.subtitle, 30) : `${labels[node.type]} · ${statuses[node.status]}`,
+    sublabel: node.type === 'requirement' ? node.subtitle : node.type === 'role' ? short(node.subtitle, 30) : `${labels[node.type]} · ${statuses[node.status]}`,
     tag: `${statuses[node.status]}${node.affected ? ' · scenario affected' : ''}`,
     pos: [position[0] + 40, position[1] - minimumY + 40] as [number, number], size: [200, 90] as [number, number],
   }));

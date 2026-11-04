@@ -1,3 +1,5 @@
+import { assessRules, combineStatus, deriveControlLinks, hasCoverage, rulesForProvision } from './policy-graph';
+import { ruleSourceLabel } from './odrl';
 import type { Candidate, Control, Finding, GraphEdge, GraphNode, Office, Person, Plan, Repair, RequirementImpact, Role, RoleImpact, Snapshot, Status } from './types';
 
 export function createBaselinePlan(): Plan {
@@ -80,16 +82,8 @@ function accountabilityReason(office: Office, roles: RoleImpact[], people: Perso
   return activePerson(people, directRole?.ownerId) ? `Accountable to ${chain[0].name}.` : `Accountability escalates to ${chain[0].name} because the immediate accountable role has no active owner.`;
 }
 
-function combineStatus(statuses: Status[]): Status {
-  if (!statuses.length) return 'unknown';
-  if (statuses.includes('unowned') || statuses.includes('at-risk')) return 'at-risk';
-  if (statuses.includes('proposed')) return 'proposed';
-  if (statuses.includes('unknown')) return 'unknown';
-  if (statuses.includes('verified')) return 'verified';
-  return 'covered';
-}
-
 export function evaluateOffice(office: Office, plan: Plan): Snapshot {
+  office = { ...office, controls: deriveControlLinks(office) };
   const people: Person[] = office.people.map(person => ({ ...person, skills: [...person.skills] }));
   const scenario = plan.scenario;
   const departing = scenario.kind === 'leave' ? people.find(person => person.id === scenario.personId) : undefined;
@@ -106,7 +100,7 @@ export function evaluateOffice(office: Office, plan: Plan): Snapshot {
     if (pending) reason += ` ${scenario.kind === 'join' ? scenario.newPerson?.name ?? 'A new starter' : personName(people, moving?.id)} is proposed for consideration; appointment, onboarding and handover are not yet confirmed.`;
     return { roleId: role.id, name: role.name, status, baselineOwnerId: role.ownerId, ownerId, accountablePersonId: null, reason, candidates: candidatesFor(office, people, role, plan) };
   });
-  const snapshot: Snapshot = { office, plan, people, roles, nodes: [], edges: [], findings: [], requirements: [], affectedNodeIds: [], summary: { affected: 0, unowned: 0, proposed: 0, verified: 0, requirementsAtRisk: 0 }, scenarioLabel: 'Baseline office' };
+  const snapshot: Snapshot = { office, plan, people, roles, nodes: [], edges: [], findings: [], requirements: [], rules: [], affectedNodeIds: [], summary: { affected: 0, unowned: 0, proposed: 0, verified: 0, requirementsAtRisk: 0 }, scenarioLabel: 'Baseline office' };
   const repairErrors = new Map<string, string[]>();
   // Resolve upstream ownership before any role whose authority depends on it.
   // This is a final-plan assessment, not a historical approval log: input array
@@ -206,13 +200,17 @@ export function evaluateOffice(office: Office, plan: Plan): Snapshot {
     for (const id of control.systemIds) pushEdge(`s:${id}`, `c:${control.id}`, 'supports');
     for (const id of control.requirementIds) pushEdge(`c:${control.id}`, `q:${id}`, 'supports requirement');
   }
+  const rules = assessRules(office, roles, systemState, controlState, roleAffected);
+  snapshot.rules = rules;
   const requirements: RequirementImpact[] = office.requirements.map(requirement => {
+    const related = rulesForProvision(office.policyGraph, requirement.provisionId);
+    const impacts = related.map(rule => rules.find(r => r.ruleId === rule.id)!);
     const controls = office.controls.filter(control => control.requirementIds.includes(requirement.id));
-    const status = combineStatus(controls.map(control => controlState.get(control.id)?.status ?? 'unknown'));
-    const affectedControls = controls.filter(control => !['covered', 'verified'].includes(controlState.get(control.id)?.status ?? 'unknown'));
-    const reason = controls.length === 0 ? 'No supporting controls are modelled; coverage is unknown.' : affectedControls.length ? affectedControls.map(control => `${control.name}: ${controlState.get(control.id)?.reason}`).join(' ') : 'The modelled supporting controls have named owners and evidence recorded as current. This is scoped coverage, not a certification or a global compliance conclusion.';
+    const status = combineStatus(impacts.map(rule => rule.status));
+    const open = impacts.filter(rule => !hasCoverage(rule.status));
+    const reason = !impacts.length ? 'No policy rules are modelled; coverage is unknown.' : open.length ? open.map(rule => rule.reason).join(' ') : 'The modelled rules have confirmed assignees, targets and control coverage. Action performance and conditions are not evaluated; this is not a compliance conclusion.';
     const impact = { requirementId: requirement.id, name: requirement.name, status, controlIds: controls.map(control => control.id), reason };
-    nodes.push({ id: `q:${requirement.id}`, type: 'requirement', entityId: requirement.id, label: requirement.name, subtitle: `${requirement.source} · ${requirement.reference}`, description: requirement.description, status, affected: controls.some(control => controlState.get(control.id)?.affected), reason });
+    nodes.push({ id: `q:${requirement.id}`, type: 'requirement', entityId: requirement.id, label: requirement.name, subtitle: `${impacts.filter(rule => hasCoverage(rule.status)).length}/${impacts.length} rules covered`, description: requirement.description, status, affected: impacts.some(rule => rule.affected), reason });
     return impact;
   });
   const findings: Finding[] = [];
@@ -221,6 +219,12 @@ export function evaluateOffice(office: Office, plan: Plan): Snapshot {
     const state = controlState.get(control.id)!;
     if (['covered', 'verified'].includes(state.status)) continue;
     findings.push(controlFinding(control, state.status, state.reason, roles));
+  }
+  for (const impact of rules.filter(rule => rule.failing === 'alignment')) {
+    const rule = office.policyGraph.rules.find(rule => rule.id === impact.ruleId)!;
+    const alignment = office.ruleAlignments.find(a => a.ruleId === rule.id);
+    const requirementIds = office.requirements.filter(requirement => rulesForProvision(office.policyGraph, requirement.provisionId).some(r => r.id === rule.id)).map(r => r.id);
+    findings.push({ id: `rule-${rule.id}`, category: 'compliance', title: impact.reason.includes('conflict') ? 'Policy rule conflict' : impact.reason.includes('cannot be assessed') ? 'Policy expression needs review' : rule.kind === 'obligation' ? 'Obligation without a control' : 'Rule without a control', description: `${ruleSourceLabel(office.policyGraph, rule)}: “${rule.source.quote}” ${impact.reason}`, status: 'unknown', roleId: alignment?.roleId ?? '', requirementIds, nodeIds: [...requirementIds.map(id => `q:${id}`), ...(alignment && roles.some(r => r.roleId === alignment.roleId) ? [`r:${alignment.roleId}`] : [])], accountablePersonId: roles.find(r => r.roleId === alignment?.roleId)?.accountablePersonId ?? null, action: 'Review the quoted clause and confirm its assignee, target and supporting controls.', evidenceNeeded: 'A reviewed rule alignment and current control evidence. Conditions and action performance need separate evaluation.' });
   }
   const affectedNodeIds = nodes.filter(node => node.affected).map(node => node.id);
   const affectedSet = new Set(affectedNodeIds);

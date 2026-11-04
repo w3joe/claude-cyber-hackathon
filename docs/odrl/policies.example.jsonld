@@ -1,0 +1,427 @@
+[
+  {
+    "@context": {
+      "odrl": "http://www.w3.org/ns/odrl/2/",
+      "mandate": "urn:mandate:vocab:",
+      "dcterms": "http://purl.org/dc/terms/",
+      "uid": "@id",
+      "profile": {
+        "@id": "odrl:profile",
+        "@type": "@id"
+      },
+      "conflict": {
+        "@id": "odrl:conflict",
+        "@type": "@id"
+      },
+      "permission": {
+        "@id": "odrl:permission",
+        "@container": "@set"
+      },
+      "prohibition": {
+        "@id": "odrl:prohibition",
+        "@container": "@set"
+      },
+      "obligation": {
+        "@id": "odrl:obligation",
+        "@container": "@set"
+      },
+      "assignee": {
+        "@id": "odrl:assignee",
+        "@type": "@id"
+      },
+      "action": {
+        "@id": "odrl:action",
+        "@type": "@id"
+      },
+      "target": {
+        "@id": "odrl:target",
+        "@type": "@id"
+      },
+      "constraint": {
+        "@id": "odrl:constraint",
+        "@container": "@set"
+      },
+      "leftOperand": {
+        "@id": "odrl:leftOperand",
+        "@type": "@id"
+      },
+      "operator": {
+        "@id": "odrl:operator",
+        "@type": "@id"
+      },
+      "rightOperand": "odrl:rightOperand"
+    },
+    "@type": "odrl:Set",
+    "uid": "urn:mandate:policy:POL-01",
+    "profile": "urn:mandate:profile:1",
+    "conflict": "http://www.w3.org/ns/odrl/2/invalid",
+    "dcterms:title": "Material campaign release",
+    "obligation": [
+      {
+        "uid": "urn:mandate:rule:POL-01-3",
+        "@type": "odrl:Duty",
+        "assignee": "urn:mandate:role:head-media",
+        "action": "urn:mandate:vocab:approveCampaign",
+        "target": "urn:mandate:system:campaign-board",
+        "constraint": [
+          {
+            "leftOperand": "urn:mandate:vocab:beforeRelease",
+            "operator": "http://www.w3.org/ns/odrl/2/eq",
+            "rightOperand": {
+              "@value": true,
+              "@type": "http://www.w3.org/2001/XMLSchema#boolean"
+            },
+            "mandate:quote": "before release"
+          }
+        ],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:POL-01-3"
+        },
+        "mandate:quote": "The Head of Media must approve material campaigns before release and record the decision.",
+        "mandate:assigneeQuote": "Head of Media",
+        "mandate:actionQuote": "approve",
+        "mandate:targetQuote": "material campaigns"
+      }
+    ],
+    "permission": [],
+    "prohibition": [
+      {
+        "uid": "urn:mandate:rule:POL-01-3.1",
+        "@type": "odrl:Prohibition",
+        "assignee": "urn:mandate:role:head-media",
+        "action": "urn:mandate:vocab:publishUnapprovedCampaign",
+        "target": "urn:mandate:system:campaign-board",
+        "constraint": [],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:POL-01-3.1"
+        },
+        "mandate:quote": "The Head of Media must not publish an unapproved campaign from the Campaign Board.",
+        "mandate:assigneeQuote": "Head of Media",
+        "mandate:actionQuote": "publish an unapproved campaign",
+        "mandate:targetQuote": "Campaign Board"
+      }
+    ]
+  },
+  {
+    "@context": {
+      "odrl": "http://www.w3.org/ns/odrl/2/",
+      "mandate": "urn:mandate:vocab:",
+      "dcterms": "http://purl.org/dc/terms/",
+      "uid": "@id",
+      "profile": {
+        "@id": "odrl:profile",
+        "@type": "@id"
+      },
+      "conflict": {
+        "@id": "odrl:conflict",
+        "@type": "@id"
+      },
+      "permission": {
+        "@id": "odrl:permission",
+        "@container": "@set"
+      },
+      "prohibition": {
+        "@id": "odrl:prohibition",
+        "@container": "@set"
+      },
+      "obligation": {
+        "@id": "odrl:obligation",
+        "@container": "@set"
+      },
+      "assignee": {
+        "@id": "odrl:assignee",
+        "@type": "@id"
+      },
+      "action": {
+        "@id": "odrl:action",
+        "@type": "@id"
+      },
+      "target": {
+        "@id": "odrl:target",
+        "@type": "@id"
+      },
+      "constraint": {
+        "@id": "odrl:constraint",
+        "@container": "@set"
+      },
+      "leftOperand": {
+        "@id": "odrl:leftOperand",
+        "@type": "@id"
+      },
+      "operator": {
+        "@id": "odrl:operator",
+        "@type": "@id"
+      },
+      "rightOperand": "odrl:rightOperand"
+    },
+    "@type": "odrl:Set",
+    "uid": "urn:mandate:policy:POL-02",
+    "profile": "urn:mandate:profile:1",
+    "conflict": "http://www.w3.org/ns/odrl/2/invalid",
+    "dcterms:title": "Account access",
+    "obligation": [
+      {
+        "uid": "urn:mandate:rule:POL-02-2",
+        "@type": "odrl:Duty",
+        "assignee": "urn:mandate:role:it-lead",
+        "action": "urn:mandate:vocab:removeAccess",
+        "target": "urn:mandate:system:identity-console",
+        "constraint": [],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:POL-02-2"
+        },
+        "mandate:quote": "The IT Lead must remove studio access for departed colleagues using the Identity Console and record completion.",
+        "mandate:assigneeQuote": "IT Lead",
+        "mandate:actionQuote": "remove studio access",
+        "mandate:targetQuote": "Identity Console"
+      },
+      {
+        "uid": "urn:mandate:rule:POL-02-3",
+        "@type": "odrl:Duty",
+        "assignee": "urn:mandate:role:head-media",
+        "action": "urn:mandate:vocab:reviewAdministratorAccess",
+        "target": "urn:mandate:system:publishing-console",
+        "constraint": [
+          {
+            "leftOperand": "urn:mandate:vocab:maximumReviewInterval",
+            "operator": "http://www.w3.org/ns/odrl/2/lteq",
+            "rightOperand": {
+              "@value": "P3M",
+              "@type": "http://www.w3.org/2001/XMLSchema#duration"
+            },
+            "mandate:quote": "at least quarterly"
+          }
+        ],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:POL-02-3"
+        },
+        "mandate:quote": "The Head of Media must review administrator access to customer publishing channels at least quarterly.",
+        "mandate:assigneeQuote": "Head of Media",
+        "mandate:actionQuote": "review administrator access",
+        "mandate:targetQuote": "customer publishing channels"
+      }
+    ],
+    "permission": [
+      {
+        "uid": "urn:mandate:rule:POL-02-4",
+        "@type": "odrl:Permission",
+        "assignee": "urn:mandate:role:head-media",
+        "action": "urn:mandate:vocab:administerPublishing",
+        "target": "urn:mandate:system:publishing-console",
+        "constraint": [],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:POL-02-4"
+        },
+        "mandate:quote": "Studio access removal must follow §2. The Head of Media may administer customer publishing channels.",
+        "mandate:assigneeQuote": "Head of Media",
+        "mandate:actionQuote": "administer",
+        "mandate:targetQuote": "customer publishing channels"
+      }
+    ],
+    "prohibition": []
+  },
+  {
+    "@context": {
+      "odrl": "http://www.w3.org/ns/odrl/2/",
+      "mandate": "urn:mandate:vocab:",
+      "dcterms": "http://purl.org/dc/terms/",
+      "uid": "@id",
+      "profile": {
+        "@id": "odrl:profile",
+        "@type": "@id"
+      },
+      "conflict": {
+        "@id": "odrl:conflict",
+        "@type": "@id"
+      },
+      "permission": {
+        "@id": "odrl:permission",
+        "@container": "@set"
+      },
+      "prohibition": {
+        "@id": "odrl:prohibition",
+        "@container": "@set"
+      },
+      "obligation": {
+        "@id": "odrl:obligation",
+        "@container": "@set"
+      },
+      "assignee": {
+        "@id": "odrl:assignee",
+        "@type": "@id"
+      },
+      "action": {
+        "@id": "odrl:action",
+        "@type": "@id"
+      },
+      "target": {
+        "@id": "odrl:target",
+        "@type": "@id"
+      },
+      "constraint": {
+        "@id": "odrl:constraint",
+        "@container": "@set"
+      },
+      "leftOperand": {
+        "@id": "odrl:leftOperand",
+        "@type": "@id"
+      },
+      "operator": {
+        "@id": "odrl:operator",
+        "@type": "@id"
+      },
+      "rightOperand": "odrl:rightOperand"
+    },
+    "@type": "odrl:Set",
+    "uid": "urn:mandate:policy:POL-03",
+    "profile": "urn:mandate:profile:1",
+    "conflict": "http://www.w3.org/ns/odrl/2/invalid",
+    "dcterms:title": "Asset recovery",
+    "obligation": [
+      {
+        "uid": "urn:mandate:rule:POL-03-2",
+        "@type": "odrl:Duty",
+        "assignee": "urn:mandate:role:operations-lead",
+        "action": "urn:mandate:vocab:testRecovery",
+        "target": "urn:mandate:system:asset-library",
+        "constraint": [],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:POL-03-2"
+        },
+        "mandate:quote": "The Operations Lead must perform a recovery exercise for the Asset Library and retain current evidence.",
+        "mandate:assigneeQuote": "Operations Lead",
+        "mandate:actionQuote": "perform a recovery exercise",
+        "mandate:targetQuote": "Asset Library"
+      }
+    ],
+    "permission": [],
+    "prohibition": []
+  },
+  {
+    "@context": {
+      "odrl": "http://www.w3.org/ns/odrl/2/",
+      "mandate": "urn:mandate:vocab:",
+      "dcterms": "http://purl.org/dc/terms/",
+      "uid": "@id",
+      "profile": {
+        "@id": "odrl:profile",
+        "@type": "@id"
+      },
+      "conflict": {
+        "@id": "odrl:conflict",
+        "@type": "@id"
+      },
+      "permission": {
+        "@id": "odrl:permission",
+        "@container": "@set"
+      },
+      "prohibition": {
+        "@id": "odrl:prohibition",
+        "@container": "@set"
+      },
+      "obligation": {
+        "@id": "odrl:obligation",
+        "@container": "@set"
+      },
+      "assignee": {
+        "@id": "odrl:assignee",
+        "@type": "@id"
+      },
+      "action": {
+        "@id": "odrl:action",
+        "@type": "@id"
+      },
+      "target": {
+        "@id": "odrl:target",
+        "@type": "@id"
+      },
+      "constraint": {
+        "@id": "odrl:constraint",
+        "@container": "@set"
+      },
+      "leftOperand": {
+        "@id": "odrl:leftOperand",
+        "@type": "@id"
+      },
+      "operator": {
+        "@id": "odrl:operator",
+        "@type": "@id"
+      },
+      "rightOperand": "odrl:rightOperand"
+    },
+    "@type": "odrl:Set",
+    "uid": "urn:mandate:policy:SOW-04",
+    "profile": "urn:mandate:profile:1",
+    "conflict": "http://www.w3.org/ns/odrl/2/invalid",
+    "dcterms:title": "Customer media commitments",
+    "obligation": [
+      {
+        "uid": "urn:mandate:rule:SOW-04-5",
+        "@type": "odrl:Duty",
+        "assignee": "urn:mandate:role:head-media",
+        "action": "urn:mandate:vocab:checkMediaRights",
+        "target": "urn:mandate:system:asset-library",
+        "constraint": [],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:SOW-04-5"
+        },
+        "mandate:quote": "The Head of Media must check media licences and permissions for customer media in the Asset Library.",
+        "mandate:assigneeQuote": "Head of Media",
+        "mandate:actionQuote": "check media licences and permissions",
+        "mandate:targetQuote": "customer media in the Asset Library"
+      },
+      {
+        "uid": "urn:mandate:rule:SOW-04-4",
+        "@type": "odrl:Duty",
+        "assignee": "urn:mandate:role:client-lead",
+        "action": "urn:mandate:vocab:recordCustomerApproval",
+        "target": "urn:mandate:system:campaign-board",
+        "constraint": [
+          {
+            "leftOperand": "urn:mandate:vocab:beforeRelease",
+            "operator": "http://www.w3.org/ns/odrl/2/eq",
+            "rightOperand": {
+              "@value": true,
+              "@type": "http://www.w3.org/2001/XMLSchema#boolean"
+            },
+            "mandate:quote": "before release"
+          }
+        ],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:SOW-04-4"
+        },
+        "mandate:quote": "The Client Lead must record customer approval for material campaigns before release.",
+        "mandate:assigneeQuote": "Client Lead",
+        "mandate:actionQuote": "record customer approval",
+        "mandate:targetQuote": "material campaigns"
+      },
+      {
+        "uid": "urn:mandate:rule:SOW-04-5.2",
+        "@type": "odrl:Duty",
+        "assignee": "urn:mandate:role:head-media",
+        "action": "urn:mandate:vocab:retainPermissionRecords",
+        "target": "urn:mandate:system:asset-library",
+        "constraint": [
+          {
+            "leftOperand": "urn:mandate:vocab:retentionPeriod",
+            "operator": "http://www.w3.org/ns/odrl/2/gteq",
+            "rightOperand": {
+              "@value": "P24M",
+              "@type": "http://www.w3.org/2001/XMLSchema#duration"
+            },
+            "mandate:quote": "at least 24 months"
+          }
+        ],
+        "dcterms:source": {
+          "@id": "urn:mandate:provision:SOW-04-5.2"
+        },
+        "mandate:quote": "The Head of Media must retain permission records in the Asset Library for at least 24 months.",
+        "mandate:assigneeQuote": "Head of Media",
+        "mandate:actionQuote": "retain permission records",
+        "mandate:targetQuote": "Asset Library"
+      }
+    ],
+    "permission": [],
+    "prohibition": []
+  }
+]

@@ -1,3 +1,5 @@
+import { ruleLabel, ruleSourceLabel } from './odrl';
+import { rulesForProvision } from './policy-graph';
 import type { GraphNode, Person, QuestionAnswer, RoleImpact, Scenario, Snapshot, Status } from './types';
 import { evaluateOffice } from './engine';
 
@@ -81,6 +83,15 @@ export function answerQuestion(question: string, snapshot: Snapshot): QuestionAn
   const text = normalise(question).slice(0, 4000);
   if (!text) return fallback();
   if (/\b(leave|leaves|leaving|departure|depart|departs|resign|resigns|fire|fired|terminate|terminated)\b/.test(text)) return departureAnswer(text, snapshot);
+
+  if (/\b(clause|clauses|obligation|obligations|rule|rules|odrl|prohibition|permission)\b/.test(text)) {
+    const impacts = snapshot.rules.filter(rule => !['covered', 'verified'].includes(rule.status));
+    const selected = impacts.length ? impacts : snapshot.rules;
+    return { title: 'Policy rule coverage', text: 'ODRL rules distinguish must, may and must not. These answers assess control coverage; conditions and action performance are not evaluated.', bullets: selected.map(impact => {
+      const rule = snapshot.office.policyGraph.rules.find(rule => rule.id === impact.ruleId)!;
+      return `${ruleSourceLabel(snapshot.office.policyGraph, rule)} · ${ruleLabel[rule.kind]}: “${rule.source.quote}” ${impact.reason} ${impact.evaluationReason}`;
+    }), nodeIds: unique(snapshot.office.requirements.filter(requirement => rulesForProvision(snapshot.office.policyGraph, requirement.provisionId).some(rule => selected.some(impact => impact.ruleId === rule.id))).map(requirement => `q:${requirement.id}`)) };
+  }
 
   if (/\b(take over|replace|replacement|deputy|deputies|handover|successor|next in charge|self heal|self healing)\b/.test(text)) {
     const specified = mentionedRoles(text, snapshot);
