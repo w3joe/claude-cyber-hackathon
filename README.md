@@ -6,9 +6,17 @@ See how people changes affect responsibility, risk and compliance evidence.
 
 ## Description
 
-Mandate is a governance, risk and compliance (GRC) planning tool for small-office managers, operations teams and security practitioners. When a department head leaves, removing their account does not answer who can approve work or own a control afterwards. Mandate makes those dependencies visible and helps record a proposed handover, its decision-maker and supporting evidence.
+When a department head leaves, their responsibilities remain. Approvals can stall, security controls can be left without an owner, and the disruption can affect other teams too.
 
-The interactive canvas connects people, roles, systems, controls and requirements. Explore someone joining, moving role or leaving, then inspect the impact and export a report. The supplied **Northstar Studio** office is fictional: the app does not revoke access, contact colleagues, inspect external evidence or certify compliance.
+We're designing a visual governance, risk and compliance canvas for small offices. It connects people, responsibilities, systems and requirements in one interactive map.
+
+Ask the assistant what would happen if the head of media left. The canvas highlights affected decisions, explains the dependencies and shows who remains accountable.
+
+The graph suggests suitable handovers and flags gaps for an authorised manager to resolve. Proposed changes stay pending until ownership and the required evidence are confirmed.
+
+The same approach works when someone joins or changes role. A report shows what's covered, what needs action and why. Small teams can use it to understand the effects of a change, keep responsibilities covered and show what they've actually verified.
+
+The supplied **Northstar Studio** office is fictional: the app does not revoke access, contact colleagues, inspect external evidence or certify compliance.
 
 ## Table of Contents
 
