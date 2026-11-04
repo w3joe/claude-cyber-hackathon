@@ -156,6 +156,12 @@ The office is currently maintained in source, not through an organisation editor
 
 ## Screenshots / Demo
 
+### Three-minute video
+
+[Watch the Mandate demo on Google Drive](https://drive.google.com/file/d/1lB5UrBpmTH9w5Yjg470VEwNFIWDC7ZOa/view?usp=sharing)
+
+The video introduces the problem through documented cases, then shows the application tracing a departure, proposing a handover, recording confirmation and reviewing the remaining evidence gaps.
+
 ![Mandate showing Maya Chen's departure: resilience score, affected-record counts, the Archify responsibility map and the key-person stress test](docs/images/mandate-mvp.jpg)
 
 The screenshot shows the fictional office with the Head of Media departure scenario running. Run the demo locally using the installation steps; **no public hosted application URL is configured in this repository**.
